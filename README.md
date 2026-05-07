@@ -125,27 +125,33 @@ sae4u-memory uninstall             # remove all config entries
 
 The 4-type classification (`user`, `feedback`, `project`, `reference`)
 plus the tick / permanent split is the architectural core. See
-[`docs/architecture.md`](docs/architecture.md) for the full
-explanation.
+[`architecture.md`](sae4u_memory/_assets/docs/architecture.md) for the
+full explanation.
 
 ---
 
 ## Documentation
 
-- [`docs/architecture.md`](docs/architecture.md) — 5 concepts, file
-  layout, the 4 types, what NOT to save
-- [`docs/tick-protocol.md`](docs/tick-protocol.md) — how the 10-min
-  hook works, what gets written where
-- [`docs/persona-customization.md`](docs/persona-customization.md) —
+All architecture content lives under [`sae4u_memory/_assets/`](sae4u_memory/_assets/) so it ships with the wheel.
+
+- [`docs/architecture.md`](sae4u_memory/_assets/docs/architecture.md) —
+  5 concepts, file layout, the 4 types, what NOT to save
+- [`docs/tick-protocol.md`](sae4u_memory/_assets/docs/tick-protocol.md) —
+  how the 10-min hook works, what gets written where
+- [`docs/persona-customization.md`](sae4u_memory/_assets/docs/persona-customization.md) —
   what's editable, what's loaded at session start
-- [`docs/episodic-bridge.md`](docs/episodic-bridge.md) — optional
-  pattern for users with a remote dev box
-- [`prompts/session-open.md`](prompts/session-open.md) — paste this
-  at session start
-- [`prompts/session-close.md`](prompts/session-close.md) — paste
-  this at session end
-- [`commands/memory-distill.md`](commands/memory-distill.md) —
+- [`docs/episodic-bridge.md`](sae4u_memory/_assets/docs/episodic-bridge.md) —
+  optional pattern for users with a remote dev box
+- [`prompts/session-open.md`](sae4u_memory/_assets/prompts/session-open.md) —
+  paste this at session start
+- [`prompts/session-close.md`](sae4u_memory/_assets/prompts/session-close.md) —
+  paste this at session end
+- [`commands/memory-distill.md`](sae4u_memory/_assets/commands/memory-distill.md) —
   weekly cleanup ritual
+- [`rules/`](sae4u_memory/_assets/rules/) — 10 universal feedback rules
+- [`hooks/memory-tick.sh`](sae4u_memory/_assets/hooks/memory-tick.sh) —
+  the UserPromptSubmit hook itself
+- [`templates/`](sae4u_memory/_assets/templates/) — MEMORY.md, feedback rule, project fact, tick log
 
 ---
 

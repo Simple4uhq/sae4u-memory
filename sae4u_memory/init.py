@@ -48,9 +48,10 @@ Whenever something surprising or non-obvious comes up: `remember()` it immediate
 {MARKER_END}
 """
 
-# Path to repo assets (hooks/, rules/, templates/) bundled with the package.
-# At install time these live in <repo-root>/ alongside the simple4u_memory package dir.
-PKG_ROOT = Path(__file__).resolve().parent.parent
+# Path to bundled assets (hooks/, rules/, templates/, etc.) — they live inside
+# the package at sae4u_memory/_assets/ so they ship with the wheel and remain
+# discoverable from both source ("pip install -e .") and PyPI installs.
+PKG_ROOT = Path(__file__).resolve().parent / "_assets"
 
 
 def claude_desktop_config() -> Path | None:

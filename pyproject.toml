@@ -28,3 +28,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["sae4u_memory*"]
+
+[tool.setuptools.package-data]
+sae4u_memory = [
+    "_assets/**/*.sh",
+    "_assets/**/*.md",
+    "_assets/**/*.template",
+]
