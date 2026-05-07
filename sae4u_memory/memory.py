@@ -1,4 +1,4 @@
-"""Memory management — SQLite + FTS5 for persistent storage and semantic search."""
+"""SAE4U Memory — SQLite + FTS5 for persistent storage and semantic search."""
 
 from __future__ import annotations
 

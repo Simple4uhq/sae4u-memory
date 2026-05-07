@@ -1,0 +1,20 @@
+---
+name: Short-project-fact-name
+description: One-line summary — what changed / what was decided / what's blocking.
+type: project
+critical: false
+---
+
+Lead with the fact or decision in one or two sentences.
+
+**Why:** Motivation — usually a constraint, deadline, or stakeholder ask.
+Concrete: "Legal flagged the auth middleware for compliance reasons."
+
+**How to apply:** How this should shape future suggestions and decisions.
+Where it's load-bearing for the work.
+
+---
+
+Note: project facts decay fast. Convert relative dates ("Thursday") to
+absolute ones ("2026-03-05") at write time. Re-evaluate periodically;
+if the situation has changed, update or remove this entry.

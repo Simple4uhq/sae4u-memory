@@ -1,129 +1,208 @@
-# Simple4u Memory — persistent memory for Claude
+# SAE4U Memory
 
-**An MCP server that gives Claude a memory that survives between sessions.**
+**A persistent memory architecture for Claude — MCP server + hooks +
+rules + prompts + templates.** Free and open source. MIT.
 
-Claude forgets you every time you close the chat. Simple4u Memory fixes that.
+Claude forgets you every time you close the chat. SAE4U Memory fixes
+that, and goes further: it ships an opinionated *architecture* for
+how persistent memory should be organized — not just storage, but
+classification, periodic review, persona, cleanup, and session
+continuity.
 
-- **Hierarchical memory** — facts with categories (user, project, preference, reference, general)
-- **Two-corpus recall** — searches both SQLite facts AND your markdown memory files (Claude Code auto-memory, feedback rules, project notes, daily tick logs) in one `recall(query)` call
-- **Session journals** — end-of-conversation notes you can read like a diary
-- **Customizable persona** — edit `~/.simple4u-memory/persona.md` to shape behavior
-- **Portable** — works in Claude Desktop, Claude Code, or any MCP client
-- **Local-first** — your memory lives in `~/.simple4u-memory/` on your machine, nothing leaves
+Part of the [SAE4U](https://github.com/Simple4uhq) OSS family
+alongside [`sae4u-agent`](https://github.com/Simple4uhq/sae4u-agent).
 
-Free and open source. MIT license.
+---
+
+## What you get
+
+### Core (works in any MCP client — Claude Desktop, Claude Code, etc.)
+
+- **Two-corpus recall** — `recall(query)` searches BOTH SQLite facts
+  AND your markdown memory files (Claude Code auto-memory dirs +
+  `~/.sae4u-memory/`) in one call. No re-explaining yourself.
+- **Hierarchical memory** — `remember(text, category)` with 5
+  categories: `user`, `feedback`, `project`, `reference`, `general`.
+- **Session journals** — `journal(text)` for end-of-session notes
+  written to `~/.sae4u-memory/journals/YYYY-MM-DD.md` for human reading.
+- **Customizable persona** — `persona.md` shapes the AI's identity.
+  Default: **Simple**, a peer-level coder friend who remembers things.
+- **Local-first** — your memory lives in `~/.sae4u-memory/` on your
+  machine. Nothing leaves.
+
+### Architecture (Claude Code with `--code-full`)
+
+- **`hooks/memory-tick.sh`** — UserPromptSubmit hook that fires every
+  10 min and forces a brief memory review. Catches borderline
+  observations before they fall out of context.
+- **`rules/`** — 10 universal feedback rules covering memory
+  discipline, session continuity, anti-confabulation, hardcode
+  prevention, post-write review.
+- **`prompts/`** — opinionated session-open and session-close prompts
+  that pair with the architecture.
+- **`templates/`** — formats for `MEMORY.md`, feedback rules,
+  project facts, and tick logs.
+- **`commands/memory-distill.md`** — weekly distill ritual that
+  promotes tick-log items to permanent memory interactively.
+
+---
 
 ## Install
 
-```bash
-pip install simple4u-memory
-```
-
-Or from source:
+### Minimum (MCP only)
 
 ```bash
-git clone https://github.com/Simple4uhq/simple4u-memory
-cd simple4u-memory
+git clone https://github.com/Simple4uhq/sae4u-memory
+cd sae4u-memory
 pip install -e .
+sae4u-memory init
 ```
 
-## Setup — one command
+This wires the MCP server into Claude Desktop and Claude Code, and
+appends a guidance block to `~/.claude/CLAUDE.md`. Restart your
+client and the memory tools are live.
 
-After install, run:
+### Full architecture (Claude Code only)
 
 ```bash
-simple4u-memory init
+sae4u-memory init --code-full
 ```
 
-This configures Claude Desktop and Claude Code automatically:
-- Adds the MCP server entry to both client configs (idempotent)
-- Writes a short guidance block to `~/.claude/CLAUDE.md` so Claude calls
-  `get_persona()` at session start and uses `remember()` proactively
+Adds:
+- Copy `hooks/memory-tick.sh` → `~/.claude/hooks/memory-tick.sh`
+- Register the hook in `~/.claude/settings.json` under `hooks.UserPromptSubmit`
+- Scaffold `~/.sae4u-memory/MEMORY.md`
+- Drop default rules into `~/.sae4u-memory/rules/`
 
-Restart Claude Desktop / Claude Code and the memory tools are live.
+Restart Claude Code. The tick will fire every 10 min and instruct the
+AI to review and classify recent context.
 
 ### Flags
 
 ```bash
-simple4u-memory init --desktop        # Claude Desktop only
-simple4u-memory init --code           # Claude Code only
-simple4u-memory init --no-claude-md   # skip CLAUDE.md guidance block
-simple4u-memory init --dry-run        # preview changes without applying
-simple4u-memory uninstall             # remove all config entries
+sae4u-memory init --desktop        # Claude Desktop only
+sae4u-memory init --code           # Claude Code MCP only
+sae4u-memory init --code-full      # Claude Code MCP + hook + scaffold
+sae4u-memory init --no-claude-md   # skip CLAUDE.md guidance block
+sae4u-memory init --dry-run        # preview changes without applying
+sae4u-memory uninstall             # remove all config entries
 ```
 
-### Manual setup (alternative)
+---
 
-If you prefer editing configs by hand, add this to
-`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS),
-`%APPDATA%\Claude\claude_desktop_config.json` (Windows),
-or `~/.claude/settings.json` (Claude Code):
-
-```json
-{
-  "mcpServers": {
-    "simple4u-memory": {
-      "command": "simple4u-memory"
-    }
-  }
-}
-```
-
-## Tools exposed
+## Tools exposed (MCP)
 
 | Tool | Purpose |
 |------|---------|
 | `remember(text, category)` | Save a fact to long-term memory |
-| `recall(query, limit, sources)` | Search memories across SQLite facts + markdown roots (Claude Code auto-memory + persona home). `sources` = `all` / `sqlite` / `markdown` |
+| `recall(query, limit, sources)` | Search across SQLite + markdown roots. `sources` = `all` / `sqlite` / `markdown` |
 | `list_memories(category)` | Browse what's remembered |
 | `forget(memory_id)` | Delete a wrong/outdated memory |
 | `journal(text)` | Write an end-of-session note |
 | `recent_journals(days)` | Read recent journal entries |
 | `get_persona()` | Return full persona + user context |
 
+---
+
+## How memory is organized
+
+```
+~/.sae4u-memory/
+├── persona.md              # Edit to customize behavior
+├── memory.db               # SQLite + FTS5
+├── MEMORY.md               # Index of permanent files (loaded at session start)
+├── user/                   # User context loaded by get_persona()
+│   ├── identity.md
+│   ├── projects.md
+│   └── preferences.md
+├── tick/                   # Day-rolling tick log (NOT indexed in MEMORY.md)
+│   └── 2026-05-07.md
+├── archive/                # User-confirmed archived files
+├── journals/               # End-of-session narratives
+│   └── 2026-05-07.md
+└── .last_tick              # Epoch of last memory tick
+```
+
+The 4-type classification (`user`, `feedback`, `project`, `reference`)
+plus the tick / permanent split is the architectural core. See
+[`docs/architecture.md`](docs/architecture.md) for the full
+explanation.
+
+---
+
+## Documentation
+
+- [`docs/architecture.md`](docs/architecture.md) — 5 concepts, file
+  layout, the 4 types, what NOT to save
+- [`docs/tick-protocol.md`](docs/tick-protocol.md) — how the 10-min
+  hook works, what gets written where
+- [`docs/persona-customization.md`](docs/persona-customization.md) —
+  what's editable, what's loaded at session start
+- [`docs/episodic-bridge.md`](docs/episodic-bridge.md) — optional
+  pattern for users with a remote dev box
+- [`prompts/session-open.md`](prompts/session-open.md) — paste this
+  at session start
+- [`prompts/session-close.md`](prompts/session-close.md) — paste
+  this at session end
+- [`commands/memory-distill.md`](commands/memory-distill.md) —
+  weekly cleanup ritual
+
+---
+
 ## Customize
 
-Your memory lives in `~/.simple4u-memory/`:
+Edit `~/.sae4u-memory/persona.md` to change the AI's identity, voice,
+and rules. Edit `~/.sae4u-memory/user/*.md` to pre-fill what the AI
+knows about you. Both are loaded fresh on every session start.
 
-```
-~/.simple4u-memory/
-├── persona.md            # Edit to change AI's behavior
-├── memory.db             # SQLite + FTS5 (don't touch unless you know)
-├── user/                 # Long-term facts about you
-│   ├── identity.md       # Who you are (name, role, values)
-│   ├── projects.md       # What you're working on
-│   └── preferences.md    # How you like to work
-└── journals/
-    └── 2026-04-12.md     # End-of-session notes
-```
+The default persona is **Simple** — a peer-level coder friend.
+Rename, rewrite, or replace as you see fit.
 
-Edit `persona.md` to change tone, rules, behavior. Edit `user/*.md` to pre-fill
-facts the AI will know on every session.
+---
 
 ## Environment
 
-- `SIMPLE4U_MEMORY_HOME` — override the data directory (default `~/.simple4u-memory`)
-- `SIMPLE4U_MARKDOWN_ROOTS` — colon-separated list of additional markdown roots `recall()` should search. Defaults to Claude Code auto-memory dir (`~/.claude/projects/<slug>/memory`) + `SIMPLE4U_MEMORY_HOME`.
+- `SAE4U_MEMORY_HOME` — override the data directory
+  (default `~/.sae4u-memory`)
+- `SAE4U_MARKDOWN_ROOTS` — colon-separated list of markdown roots
+  that `recall()` should search. Defaults to all Claude Code
+  auto-memory dirs (globbed from `~/.claude/projects/*/memory/`)
+  plus `SAE4U_MEMORY_HOME`.
+
+---
 
 ## Uninstall
 
 ```bash
-simple4u-memory uninstall   # remove configs from Claude Desktop + Code
-pip uninstall simple4u-memory
-rm -rf ~/.simple4u-memory   # optional — also delete stored memories
+sae4u-memory uninstall    # remove configs from Claude Desktop + Code
+rm ~/.claude/hooks/memory-tick.sh    # if you ran --code-full
+rm -rf ~/.sae4u-memory    # optional — also delete stored memories
+pip uninstall sae4u-memory
 ```
+
+---
 
 ## Status
 
-v0.1.3 — default persona rewritten as working rules (no character, no name).
-Ships discipline, not personality: no-hardcode, verify-before-citing, no-silent-
-rewrites, post-write review pass. v0.1.2 added two-corpus `recall()` (SQLite +
-markdown). Future: adaptive persona, semantic embeddings, team-shared memories.
+**v0.2.0** — memory architecture release. Full export of the pattern
+the project authors run in production: hooks + rules + prompts +
+templates + persona + extended `init` for Claude Code. Renamed from
+`simple4u-memory` to align with the SAE4U OSS family.
 
-## Built by Simple4u
+Previous: v0.1.3 (under the old name) shipped two-corpus recall and
+a working-rules persona. v0.1.x users on PyPI: install fresh from
+this repo; the old package is no longer maintained.
 
-We make AI employees. [simple4uhq.com](https://simple4uhq.com)
+---
+
+## Sister project
+
+- [`sae4u-agent`](https://github.com/Simple4uhq/sae4u-agent) —
+  multi-tenant control plane and agent runtime template. The
+  agents need memory; this is that memory.
+
+---
 
 ## License
 
-MIT
+MIT.

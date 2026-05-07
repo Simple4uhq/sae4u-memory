@@ -1,0 +1,20 @@
+# MEMORY index
+
+<!--
+This file is the table of contents for your persistent memory.
+Each entry is one line, under ~150 characters.
+
+Format:
+    - [Title](filename.md) — one-line hook explaining why this matters
+
+Type prefixes (optional, use for visual scanning):
+    - [user_*]      — facts about you (role, preferences, knowledge)
+    - [feedback_*]  — rules and corrections
+    - [project_*]   — ongoing work, decisions, state
+    - [reference_*] — pointers to external systems
+
+Highlight foundational entries with **bold** and "(CRITICAL)".
+
+Keep this index < 200 lines (most loaders truncate beyond that).
+The tick log under tick/ is NOT indexed here — it's distilled separately.
+-->

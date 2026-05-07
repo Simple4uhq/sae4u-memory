@@ -1,0 +1,17 @@
+---
+name: Short-rule-name
+description: One-line summary used to decide relevance in future conversations — be specific.
+type: feedback
+critical: false
+---
+
+Lead with the rule itself in one or two sentences.
+
+**Why:** The reason — usually a specific incident, a strong preference,
+or a constraint that forced this rule. Concrete: "On 2026-04-13 I did X,
+which broke Y." Knowing the why lets future-you judge edge cases.
+
+**How to apply:**
+- Where the rule kicks in (which kinds of tasks, which contexts)
+- Where it does NOT apply (so future-you doesn't over-apply)
+- Concrete example, ideally

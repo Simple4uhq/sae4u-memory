@@ -1,4 +1,4 @@
-"""Simple4u Memory MCP server — exposes memory tools to any MCP-compatible client."""
+"""SAE4U Memory MCP server — exposes memory tools to any MCP-compatible client."""
 
 from __future__ import annotations
 
@@ -8,22 +8,22 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from simple4u_memory.markdown_memory import MarkdownMemoryStore
-from simple4u_memory.memory import MemoryStore
-from simple4u_memory.persona import PersonaLoader
+from sae4u_memory.markdown_memory import MarkdownMemoryStore
+from sae4u_memory.memory import MemoryStore
+from sae4u_memory.persona import PersonaLoader
 
 
 def get_home() -> Path:
-    """Resolve data directory. Override with SIMPLE4U_MEMORY_HOME env var."""
-    env_home = os.environ.get("SIMPLE4U_MEMORY_HOME")
+    """Resolve data directory. Override with SAE4U_MEMORY_HOME env var."""
+    env_home = os.environ.get("SAE4U_MEMORY_HOME")
     if env_home:
         return Path(env_home).expanduser()
-    return Path.home() / ".simple4u-memory"
+    return Path.home() / ".sae4u-memory"
 
 
 # MCP server and shared state are initialized lazily so CLI subcommands
 # (init, uninstall) don't touch the filesystem or import heavy resources.
-mcp = FastMCP("simple4u-memory")
+mcp = FastMCP("sae4u-memory")
 _STORE: MemoryStore | None = None
 _PERSONA: PersonaLoader | None = None
 _MARKDOWN: MarkdownMemoryStore | None = None
@@ -61,7 +61,7 @@ def remember(text: str, category: str = "general") -> str:
 
     Args:
         text: The fact or observation to remember.
-        category: Optional category — "user", "project", "preference",
+        category: Optional category — "user", "feedback", "project",
                   "reference", "general". Defaults to "general".
     """
     memory_id = _store().remember(text, category=category)
@@ -79,8 +79,8 @@ def recall(
 
     Scans TWO corpora by default and merges results:
       1. SQLite memories (written via `remember` tool)
-      2. Markdown memory files — Claude Code auto-memory + simple4u-memory home
-         (configurable via SIMPLE4U_MARKDOWN_ROOTS env, colon-separated paths)
+      2. Markdown memory files — Claude Code auto-memory + sae4u-memory home
+         (configurable via SAE4U_MARKDOWN_ROOTS env, colon-separated paths)
 
     Use this at the start of any substantive conversation to pull in prior
     context, feedback rules, project state, and recent session observations.
@@ -134,7 +134,7 @@ def list_memories(category: str | None = None, limit: int = 20) -> str:
     """List stored memories, optionally filtered by category.
 
     Args:
-        category: Filter by category (user/project/preference/reference/general).
+        category: Filter by category (user/feedback/project/reference/general).
         limit: Max results to return.
     """
     memories = _store().list_all(category=category, limit=limit)
@@ -169,7 +169,7 @@ def journal(text: str) -> str:
 
     Use this at the end of a significant conversation to record what happened,
     decisions made, and what to remember for next time. Journals are stored in
-    ~/.simple4u-memory/journals/YYYY-MM-DD.md for human reading.
+    ~/.sae4u-memory/journals/YYYY-MM-DD.md for human reading.
 
     Args:
         text: The journal entry text.
@@ -208,7 +208,7 @@ def main() -> None:
     """Entry point. Routes to CLI subcommands or MCP server."""
     argv = sys.argv[1:]
     if argv and argv[0] in {"init", "uninstall", "--help", "-h"}:
-        from simple4u_memory.init import run_cli
+        from sae4u_memory.init import run_cli
         sys.exit(run_cli(argv))
 
     # Default: run MCP server over stdio

@@ -1,0 +1,21 @@
+# Tick log YYYY-MM-DD
+
+<!--
+Format for each tick entry:
+
+## HH:MM — [type] short title
+Body — what's the fact, decision, or preference.
+Optional: pointer to a permanent file if this got promoted.
+
+Types:
+- [user]      — about the user
+- [feedback]  — corrections / validations
+- [project]   — ongoing work, decisions
+- [reference] — external system pointers
+
+Tick log is NOT indexed in MEMORY.md. It's the rolling buffer that
+the weekly /memory-distill command sorts through, promoting some
+items to permanent memory and forgetting the rest.
+
+Lower the importance threshold here — record borderline items.
+-->
